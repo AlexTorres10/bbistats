@@ -1,0 +1,11 @@
+.crest-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px; /* Set the height of the container */
+}
+
+.club-crest {
+    max-width: 75%;
+    max-height: 75%;
+}

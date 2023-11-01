@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-br">
+  {% include 'header.html' %}
+  <body>
+    
+    
+    <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+        <div class="position-sticky">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/ligas/premier-league">PREMIER LEAGUE</a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link active" href="/ligas/championship">CHAMPIONSHIP</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/ligas/league-one">LEAGUE ONE</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/ligas/league-two">LEAGUE TWO</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link active" href="/ligas/national-league">NATIONAL LEAGUE</a>
+                </li>
+                </ul>
+            </ul>
+        </div>
+    </nav>
+
+      <!-- Main content area -->
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <h1>Bem-vindo ao BBI Stats!</h1>
+        <h3>Escolha a liga desejada:</h3>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-2 mb-4">
+                    <div class="crest-container">
+                        <a href="/ligas/premier-league"> <!-- Link to the Premier League page -->
+                            <img src="/static/ligas/premier-league.png" alt="Premier League" class="club-crest img-fluid">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <div class="crest-container">
+                        <a href="/ligas/championship"> <!-- Link to the Championship page -->
+                            <img src="/static/ligas/championship.png" alt="Championship" class="club-crest img-fluid">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <div class="crest-container">
+                        <a href="/ligas/league-one"> <!-- Link to the League One page -->
+                            <img src="/static/ligas/league-one.png" alt="League One" class="club-crest img-fluid">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <div class="crest-container">
+                        <a href="/ligas/league-two"> <!-- Link to the League Two page -->
+                            <img src="/static/ligas/league-two.png" alt="League Two" class="club-crest img-fluid">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <div class="crest-container">
+                        <a href="/ligas/national-league"> <!-- Link to the National League page -->
+                            <img src="/static/ligas/national-league.png" alt="National League" class="club-crest img-fluid">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    </div>
+
+    <style>
+        .table-container {
+            display: inline-flex;
+        }
+    
+        .table-wrapper {
+            margin-right: 20px;
+        }
+    
+        table {
+            border-collapse: collapse;
+            width: 250px;
+            font-size: 11px; /* Set the font size for table cells */
+        }
+    
+        th, td {
+            border: 1px solid black;
+            padding: 3px;
+            text-align: left;
+        }
+    </style>
+    
+    <div class="table-container">
+        {% for league, table in tabelas.items %}
+            <div class="table-wrapper">
+                <h3>{{ league }}</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th text-align="center"></th>
+                            <th>Time</th>
+                            <th>J</th>
+                            <th>SG</th>
+                            <th>Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for index, row in table.iterrows %}
+                            <tr>
+                                <td style="text-align: center; vertical-align: middle;"><img src="/static/escudos/{{ row.Time }}.png" alt="{{ row.Time }} Crest" height="30px" ></td>
+                                <td>{{ row.Time }}</td>
+                                <td>{{ row.J }}</td>
+                                <td>{{ row.SG }}</td>
+                                <td>{{ row.Pts }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+  </body>
+</html>
