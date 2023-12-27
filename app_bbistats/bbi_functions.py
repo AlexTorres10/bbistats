@@ -126,36 +126,47 @@ def allinsights(df, nome, time_ou_liga=''):
     # Quantas vitórias em 10 jogos? (Se > 7, sinalizar, se < 3, sinalizar)
     df_vitorias = pd.DataFrame()
     if time_ou_liga == 'time':
-        _ = df_aux.tail(10)
-        try:
-            wins = _['result'].value_counts()['win']
-        except:
-            wins = 0
-        df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins}])])
-    elif time_ou_liga == 'liga':
-        for time in df:
-            _ = df[time]
-            _ = _.tail(10)
+        n = 7
+        wins = 1
+        while wins == 1:
+            _ = df_aux.tail(n)
             try:
                 wins = _['result'].value_counts()['win']
             except:
                 wins = 0
-            df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':time,'vitorias':wins}])])
-    
+            n += 1
+        df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins, '1V_qtos_jogos':n-1}])])
+    else:
+        for time in df:
+            n = 7
+            wins = 1
+            _ = df[time]
+            while wins == 1 and n <= df[time].shape[0]:
+                _ = df[time].tail(n)
+                try:
+                    wins = _['result'].value_counts()['win']
+                except:
+                    wins = 0
+                n+=1
+            print("Tô preso aqui")
+            df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins, '1V_qtos_jogos':n-1}])])
     df_stats = pd.merge(df_stats,df_vitorias,on='time',how='left')
     # Quantas derrotas em 10 jogos? (Se > 7, sinalizar, se < 3, sinalizar)
     df_derrotas = pd.DataFrame()
     if time_ou_liga == 'time':
-        _ = df_aux.tail(10)
-        try:
-            loss = _['result'].value_counts()['loss']
-        except:
-            loss = 0
-        df_derrotas = pd.concat([df_derrotas, pd.DataFrame([{'time':nome,'derrotas':loss}])])
+        n = 7
+        loss = 1
+        while loss == 1 and n <= df_aux.shape[0]:
+            _ = df_aux.tail(n)
+            try:
+                loss = _['result'].value_counts()['loss']
+            except:
+                loss = 0
+            n += 1
+        df_derrotas = pd.concat([df_derrotas, pd.DataFrame([{'time':nome,'derrotas':loss, '1D_qtos_jogos':n-1}])])
     elif time_ou_liga == 'liga':
         for time in df:
-            _ = df[time]
-            _ = _.tail(10)
+            _ = df[time].tail(10)
             try:
                 loss = _['result'].value_counts()['loss']
             except:
@@ -202,25 +213,28 @@ def allinsights(df, nome, time_ou_liga=''):
         df_pts_5 = pd.concat([df_pts_5, pd.DataFrame([{'time':nome,'pts_5':pts}])])
     df_stats = pd.merge(df_stats,df_pts_5,on='time',how='left')
 
-    # Quantos gols feitos nos últimos jogos?
-    df_gf = pd.DataFrame(columns=['time'])
-    if time_ou_liga == 'time':
-        gf = df_aux['gf'].tail(5).sum()
-        media = df_aux['gf'].tail(5).mean()
-        df_gf = pd.concat([df_gf, pd.DataFrame([{'time':nome,'gf_ult5':gf,'gf_ult5_media':media}])])
-
-        df_stats = pd.merge(df_stats,df_gf,on='time',how='left')
-    # Quantos gols sofridos nos últimos jogos?
-    df_gs = pd.DataFrame(columns=['time'])
-    if time_ou_liga == 'time':
-        gs = df_aux['gs'].tail(5).sum()
-        media = df_aux['gs'].tail(5).mean()
-        df_gs = pd.concat([df_gs, pd.DataFrame([{'time':nome,'gs_ult5':gs,'gs_ult5_media':media}])])
-        
-    df_stats = pd.merge(df_stats,df_gs,on='time',how='left')
+    
 
     df_home_away_games = pd.DataFrame(columns=['time'])
     if time_ou_liga == 'time':
+
+        # Quantos gols feitos nos últimos jogos?
+        df_gf = pd.DataFrame(columns=['time'])
+        if time_ou_liga == 'time':
+            gf = df_aux['gf'].tail(5).sum()
+            media = df_aux['gf'].tail(5).mean()
+            df_gf = pd.concat([df_gf, pd.DataFrame([{'time':nome,'gf_ult5':gf,'gf_ult5_media':media}])])
+
+            df_stats = pd.merge(df_stats,df_gf,on='time',how='left')
+        # Quantos gols sofridos nos últimos jogos?
+        df_gs = pd.DataFrame(columns=['time'])
+        if time_ou_liga == 'time':
+            gs = df_aux['gs'].tail(5).sum()
+            media = df_aux['gs'].tail(5).mean()
+            df_gs = pd.concat([df_gs, pd.DataFrame([{'time':nome,'gs_ult5':gs,'gs_ult5_media':media}])])
+            
+        df_stats = pd.merge(df_stats,df_gs,on='time',how='left')
+
         _ = df_aux.copy()
         _ = _[_['casa'] == nome].reset_index(drop=True)
         num_jogos_casa = _.shape[0]
@@ -321,14 +335,8 @@ def allinsights(df, nome, time_ou_liga=''):
                 insights.append(f"{stats['time']} está invicto fora!")
             elif stats['fora_nao_perde_faz'] >= 5:
                 insights.append(f"{stats['time']} está invicto fora há {int(stats['fora_nao_perde_faz'])} jogos!")
-    
-            if stats['vitorias'] > 7:
-                if stats['num_jogos'] >= 10:
-                    insights.append(f"{stats['time']} possui {int(stats['vitorias'])} vitórias em 10 jogos.")
-                else:
-                    insights.append(f"{stats['time']} possui {int(stats['vitorias'])} vitórias em {stats['num_jogos']} jogos.")
-                if stats['derrotas'] < 3 and stats['derrotas'] > 0:
-                    insights.append(f"{stats['time']} possui {int(stats['derrotas'])} derrotas em {stats['num_jogos']} jogos.")
+
+            
     
     for row in _.iterrows():
         stats = row[1]
@@ -353,22 +361,46 @@ def allinsights(df, nome, time_ou_liga=''):
             elif stats['fora_nao_vence_faz'] >= 5:
                 insights.append(f"{stats['time']} não vence fora há {int(stats['fora_nao_vence_faz'])} jogos!")
 
-            if stats['derrotas'] > 7:
+            
+    
+    if time_ou_liga == 'time':
+        insights.append(f"Forma: {form_5}")
+        for row in _.iterrows():
+
+            stats = row[1]
+            if stats['1V_qtos_jogos'] > 7:
+                insights.append(f"{stats['time']} possui 1 vitória em {int(stats['1V_qtos_jogos'])} jogos.")
+            elif stats['derrotas'] > 7:
                 if stats['num_jogos'] >= 10:
                     insights.append(f"{stats['time']} possui {int(stats['derrotas'])} derrotas em 10 jogos.")
                 else:
                     insights.append(f"{stats['time']} possui {int(stats['derrotas'])} derrotas em {stats['num_jogos']} jogos.")
 
-            if stats['vitorias'] < 3 and stats['vitorias'] > 0:
+                if stats['vitorias'] < 3 and stats['vitorias'] > 0:
+                    if stats['num_jogos'] >= 10:
+                        insights.append(f"{stats['time']} possui {int(stats['vitorias'])} vitórias em 10 jogos.")
+                    else:
+                        insights.append(f"{stats['time']} possui {int(stats['vitorias'])} vitórias em {stats['num_jogos']} jogos.")
+
+            if stats['1D_qtos_jogos'] > 7:
+                insights.append(f"{stats['time']} possui 1 derrota em {int(stats['1D_qtos_jogos'])} jogos.")
+            elif stats['vitorias'] > 7:
                 if stats['num_jogos'] >= 10:
                     insights.append(f"{stats['time']} possui {int(stats['vitorias'])} vitórias em 10 jogos.")
+                    if stats['derrotas'] < 3 and stats['derrotas'] > 0:
+                        if stats['derrotas'] == 1:
+                            insights.append(f"{stats['time']} possui {int(stats['derrotas'])} derrota em 10 jogos.")
+                        else:
+                            insights.append(f"{stats['time']} possui {int(stats['derrotas'])} derrotas em 10 jogos.")
                 else:
                     insights.append(f"{stats['time']} possui {int(stats['vitorias'])} vitórias em {stats['num_jogos']} jogos.")
-    
-    if time_ou_liga == 'time':
-        insights.append(f"Forma: {form_5}")
-        for row in _.iterrows():
-            stats = row[1]
+                    if stats['derrotas'] < 3 and stats['derrotas'] > 0:
+                        if stats['derrotas'] == 1:
+                            insights.append(f"{stats['time']} possui {int(stats['derrotas'])} derrota em {stats['num_jogos']} jogos.")
+                        else:
+                            insights.append(f"{stats['time']} possui {int(stats['derrotas'])} derrotas em {stats['num_jogos']} jogos.")
+            
+            
             if stats['num_jogos'] >= 5:
                 if stats['pts_5'] >= 2:
                     insights.append(f"{stats['time']} fez {int(stats['pts_5'])} pontos nos últimos 5 jogos!")
@@ -397,7 +429,7 @@ def allinsights(df, nome, time_ou_liga=''):
     # print(insights)
     return insights
 
-def atualiza_tabela(tabela, home, away, result):
+def atualiza_tabela(tabela, home, away, result, tipo_tabela=''):
     # Aqui estou contando que o que está no banco de dados já está nos conformes.
     homescore = int(result.split('-')[0])
     awayscore = int(result.split('-')[1])
@@ -406,23 +438,58 @@ def atualiza_tabela(tabela, home, away, result):
             ishome = True
         else:
             ishome = False
-        if ishome:
-            gd = homescore-awayscore
-            tabela['GM'] = np.where(tabela['Time'] == team,tabela['GM']+homescore,tabela['GM'])
-            tabela['GS'] = np.where(tabela['Time'] == team,tabela['GS']+awayscore,tabela['GS'])
-        else:
-            gd = awayscore-homescore
-            tabela['GM'] = np.where(tabela['Time'] == team,tabela['GM']+awayscore,tabela['GM'])
-            tabela['GS'] = np.where(tabela['Time'] == team,tabela['GS']+homescore,tabela['GS'])
-        #Mais um jogo
-        tabela['J'] = np.where(tabela['Time'] == team,tabela['J']+1,tabela['J'])
-        tabela['SG'] = np.where(tabela['Time'] == team,tabela['SG']+gd,tabela['SG'])
+        if tipo_tabela == '':
+            if ishome:
+                gd = homescore-awayscore
+                tabela['GM'] = np.where(tabela['Time'] == team,tabela['GM']+homescore,tabela['GM'])
+                tabela['GS'] = np.where(tabela['Time'] == team,tabela['GS']+awayscore,tabela['GS'])
+            else:
+                gd = awayscore-homescore
+                tabela['GM'] = np.where(tabela['Time'] == team,tabela['GM']+awayscore,tabela['GM'])
+                tabela['GS'] = np.where(tabela['Time'] == team,tabela['GS']+homescore,tabela['GS'])
+            #Mais um jogo
+            tabela['J'] = np.where(tabela['Time'] == team,tabela['J']+1,tabela['J'])
+            tabela['SG'] = np.where(tabela['Time'] == team,tabela['SG']+gd,tabela['SG'])
 
-        if (gd > 0):
-            tabela['Pts'] = np.where(tabela['Time'] == team,tabela['Pts']+3,tabela['Pts'])
-            tabela['V'] = np.where(tabela['Time'] == team,tabela['V']+1,tabela['V'])
-        elif (gd == 0):
-            tabela['Pts'] = np.where(tabela['Time'] == team,tabela['Pts']+1,tabela['Pts'])
-            tabela['E'] = np.where(tabela['Time'] == team,tabela['E']+1,tabela['E'])
-        else:
-            tabela['D'] = np.where(tabela['Time'] == team,tabela['D']+1,tabela['D'])
+            if gd > 0:
+                tabela['Pts'] = np.where(tabela['Time'] == team,tabela['Pts']+3,tabela['Pts'])
+                tabela['V'] = np.where(tabela['Time'] == team,tabela['V']+1,tabela['V'])
+            elif gd == 0:
+                tabela['Pts'] = np.where(tabela['Time'] == team,tabela['Pts']+1,tabela['Pts'])
+                tabela['E'] = np.where(tabela['Time'] == team,tabela['E']+1,tabela['E'])
+            else:
+                tabela['D'] = np.where(tabela['Time'] == team,tabela['D']+1,tabela['D'])
+        elif tipo_tabela == 'mandante':
+            if ishome:
+                gd = homescore-awayscore
+                tabela['GM'] = np.where(tabela['Time'] == team,tabela['GM']+homescore,tabela['GM'])
+                tabela['GS'] = np.where(tabela['Time'] == team,tabela['GS']+awayscore,tabela['GS'])
+
+                tabela['J'] = np.where(tabela['Time'] == team,tabela['J']+1,tabela['J'])
+                tabela['SG'] = np.where(tabela['Time'] == team,tabela['SG']+gd,tabela['SG'])
+
+                if gd > 0:
+                    tabela['Pts'] = np.where(tabela['Time'] == team,tabela['Pts']+3,tabela['Pts'])
+                    tabela['V'] = np.where(tabela['Time'] == team,tabela['V']+1,tabela['V'])
+                elif gd == 0:
+                    tabela['Pts'] = np.where(tabela['Time'] == team,tabela['Pts']+1,tabela['Pts'])
+                    tabela['E'] = np.where(tabela['Time'] == team,tabela['E']+1,tabela['E'])
+                else:
+                    tabela['D'] = np.where(tabela['Time'] == team,tabela['D']+1,tabela['D'])
+        elif tipo_tabela == 'visitante':
+            if not ishome:
+                gd = awayscore-homescore
+                tabela['GM'] = np.where(tabela['Time'] == team,tabela['GM']+homescore,tabela['GM'])
+                tabela['GS'] = np.where(tabela['Time'] == team,tabela['GS']+awayscore,tabela['GS'])
+
+                tabela['J'] = np.where(tabela['Time'] == team,tabela['J']+1,tabela['J'])
+                tabela['SG'] = np.where(tabela['Time'] == team,tabela['SG']+gd,tabela['SG'])
+
+                if gd > 0:
+                    tabela['Pts'] = np.where(tabela['Time'] == team,tabela['Pts']+3,tabela['Pts'])
+                    tabela['V'] = np.where(tabela['Time'] == team,tabela['V']+1,tabela['V'])
+                elif gd == 0:
+                    tabela['Pts'] = np.where(tabela['Time'] == team,tabela['Pts']+1,tabela['Pts'])
+                    tabela['E'] = np.where(tabela['Time'] == team,tabela['E']+1,tabela['E'])
+                else:
+                    tabela['D'] = np.where(tabela['Time'] == team,tabela['D']+1,tabela['D'])

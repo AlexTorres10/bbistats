@@ -6,7 +6,7 @@ from .bbi_functions import *
 def get_results(time):
     return Result.objects.filter(casa=time) | Result.objects.filter(fora=time).order_by('data')
 
-def forma_tabela(divisao):
+def forma_tabela(divisao, tipo_tabela=''):
     times_da_liga = Time.objects.filter(divisao=divisao).order_by('time')
     colunas_tabela = ['Time','J','V','E','D','GM','GS','SG','Pts']
     tabela = pd.DataFrame(columns=colunas_tabela)
@@ -16,8 +16,8 @@ def forma_tabela(divisao):
         novo_time = {'Time': time.time, 'J': 0, 'V': 0, 'E': 0, 'D': 0, 'GM': 0, 'GS': 0, 'SG': 0, 'Pts': 0}
         tabela = pd.concat([tabela, pd.DataFrame([novo_time])], ignore_index=True)
 
-    times_que_perderam_pts = ['Reading', 'Wigan Athletic']
-    pontos_a_tirar = {'Reading': 4, 'Wigan Athletic': 8}
+    times_que_perderam_pts = ['Reading', 'Wigan Athletic', 'Southend United', 'Everton']
+    pontos_a_tirar = {'Reading': 4, 'Wigan Athletic': 8, 'Southend United': 10, 'Everton':10}
 
     for team in times_que_perderam_pts:
         if team in tabela['Time'].values:
@@ -26,7 +26,7 @@ def forma_tabela(divisao):
 
     resultados_da_liga = Result.objects.filter(liga=divisao).order_by('data')
     for result in resultados_da_liga:
-        atualiza_tabela(tabela, result.casa, result.fora, result.placar)
+        atualiza_tabela(tabela, result.casa, result.fora, result.placar, tipo_tabela)
     tabela = tabela.sort_values(by=['Pts','SG','GM'], ascending=False,ignore_index=False).reset_index(drop=True).reset_index()
     tabela['index'] = tabela['index']+1
     tabela = tabela.rename(columns={'index':'Pos'})
@@ -86,6 +86,8 @@ def liga(request, liga):
     }
 
     tabela_liga = forma_tabela(liga_base)
+    tabela_home = forma_tabela(liga_base, 'mandante')
+    tabela_away = forma_tabela(liga_base, 'visitante')
 
     return render(request, 'liga.html', {'league': liga_base, 'stats': stats, 'sb':sb, 'times_da_liga':times_da_liga, 'tabela_liga':tabela_liga})
 
