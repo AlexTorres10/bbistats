@@ -148,7 +148,6 @@ def allinsights(df, nome, time_ou_liga=''):
                 except:
                     wins = 0
                 n+=1
-            print("Tô preso aqui")
             df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins, '1V_qtos_jogos':n-1}])])
     df_stats = pd.merge(df_stats,df_vitorias,on='time',how='left')
     # Quantas derrotas em 10 jogos? (Se > 7, sinalizar, se < 3, sinalizar)

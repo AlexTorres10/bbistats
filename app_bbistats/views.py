@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.db import connection
 from .models import *
 from .bbi_functions import *
+from datetime import datetime
 
 def get_results(time):
     return Result.objects.filter(casa=time) | Result.objects.filter(fora=time).order_by('data')
@@ -30,6 +31,12 @@ def forma_tabela(divisao, tipo_tabela=''):
     tabela = tabela.sort_values(by=['Pts','SG','GM'], ascending=False,ignore_index=False).reset_index(drop=True).reset_index()
     tabela['index'] = tabela['index']+1
     tabela = tabela.rename(columns={'index':'Pos'})
+
+    times_da_liga = Time.objects.filter(divisao=divisao).order_by('time')
+
+    df_times = pd.DataFrame.from_records(times_da_liga.values())
+    df_times.columns = ['idtimes', 'Time', 'divisao', 'url']
+    tabela = tabela.merge(df_times[['Time', 'url']], on='Time',how='left')
     return tabela
 
 
@@ -89,7 +96,8 @@ def liga(request, liga):
     tabela_home = forma_tabela(liga_base, 'mandante')
     tabela_away = forma_tabela(liga_base, 'visitante')
 
-    return render(request, 'liga.html', {'league': liga_base, 'stats': stats, 'sb':sb, 'times_da_liga':times_da_liga, 'tabela_liga':tabela_liga})
+    return render(request, 'liga.html', {'league': liga_base, 'stats': stats, 'sb':sb, 'times_da_liga':times_da_liga, 'tabela_liga':tabela_liga,
+                                         'tabela_home':tabela_home, 'tabela_away':tabela_away})
 
 
 def times(request, team_name):

@@ -44,7 +44,7 @@
                             {% if league == "Premier League" %}
                             {% for time in times_da_liga %}
                             <li class="nav-item">
-                                <a class="nav-link" href="/times/{{ time.url }}">{{ time.time }}</a>
+                                <a class="nav-link" href="/times/{{ time.url }}" style="font-size: smaller;">{{ time.time }}</a>
                             </li>
                             {% endfor %}
                             {% endif %}
@@ -57,7 +57,7 @@
                             {% if league == "Championship" %}
                             {% for time in times_da_liga %}
                             <li class="nav-item">
-                                <a class="nav-link" href="/times/{{ time.url }}">{{ time.time }}</a>
+                                <a class="nav-link" href="/times/{{ time.url }}" style="font-size: smaller;">{{ time.time }}</a>
                             </li>
                             {% endfor %}
                             {% endif %}
@@ -70,7 +70,7 @@
                             {% if league == "League One" %}
                             {% for time in times_da_liga %}
                             <li class="nav-item">
-                                <a class="nav-link" href="/times/{{ time.url }}">{{ time.time }}</a>
+                                <a class="nav-link" href="/times/{{ time.url }}" style="font-size: smaller;">{{ time.time }}</a>
                             </li>
                             {% endfor %}
                             {% endif %}
@@ -83,7 +83,7 @@
                             {% if league == "League Two" %}
                             {% for time in times_da_liga %}
                             <li class="nav-item">
-                                <a class="nav-link" href="/times/{{ time.url }}">{{ time.time }}</a>
+                                <a class="nav-link" href="/times/{{ time.url }}" style="font-size: smaller;">{{ time.time }}</a>
                             </li>
                             {% endfor %}
                             {% endif %}
@@ -96,7 +96,7 @@
                             {% if league == "National League" %}
                             {% for time in times_da_liga %}
                             <li class="nav-item">
-                                <a class="nav-link" href="/times/{{ time.url }}">{{ time.time }}</a>
+                                <a class="nav-link" href="/times/{{ time.url }}" style="font-size: smaller;">{{ time.time }}</a>
                             </li>
                             {% endfor %}
                             {% endif %}
@@ -147,8 +147,82 @@
                                 {% for index, row in tabela_liga.iterrows %}
                                 <tr>
                                     <td>{{row.Pos}}</td>
-                                    <td style="text-align: center; vertical-align: middle;"><img src="/static/escudos/{{ row.Time }}.png" alt="{{ row.Time }} Crest" height="30px"></td>
-                                    <td>{{ row.Time }}</td>
+                                    <td style="text-align: center; vertical-align: middle;" ><a href="/times/{{ row.url }}" ><img src="/static/escudos/{{ row.Time }}.png" alt="{{ row.Time }} Crest" height="30px"></a></td>
+                                    <td><a href="/times/{{ row.url }}" style="color: inherit; text-decoration: none;">{{ row.Time }}</a></td>
+                                    <td>{{ row.J }}</td>
+                                    <td>{{ row.V }}</td>
+                                    <td>{{ row.E }}</td>
+                                    <td>{{ row.D }}</td>
+                                    <td>{{ row.GM }}</td>
+                                    <td>{{ row.GS }}</td>
+                                    <td>{{ row.SG }}</td>
+                                    <td>{{ row.Pts }}</td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h3>Tabela da {{ league }} - Casa</h3>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Pos.</th>
+                                        <th></th>
+                                        <th>Time</th>
+                                        <th>J</th>
+                                        <th>V</th>
+                                        <th>E</th>
+                                        <th>D</th>
+                                        <th>GM</th>
+                                        <th>GS</th>
+                                        <th>SG</th>
+                                        <th>Pts</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for index, row in tabela_home.iterrows %}
+                                <tr>
+                                    <td>{{row.Pos}}</td>
+                                    <td style="text-align: center; vertical-align: middle;" ><a href="/times/{{ row.url }}"><img src="/static/escudos/{{ row.Time }}.png" alt="{{ row.Time }} Crest" height="30px"></a></td>
+                                    <td><a href="/times/{{ row.url }}" style="color: inherit; text-decoration: none;">{{ row.Time }}</a></td>
+                                    <td>{{ row.J }}</td>
+                                    <td>{{ row.V }}</td>
+                                    <td>{{ row.E }}</td>
+                                    <td>{{ row.D }}</td>
+                                    <td>{{ row.GM }}</td>
+                                    <td>{{ row.GS }}</td>
+                                    <td>{{ row.SG }}</td>
+                                    <td>{{ row.Pts }}</td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h3>Tabela da {{ league }} - Visitante</h3>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Pos.</th>
+                                        <th></th>
+                                        <th>Time</th>
+                                        <th>J</th>
+                                        <th>V</th>
+                                        <th>E</th>
+                                        <th>D</th>
+                                        <th>GM</th>
+                                        <th>GS</th>
+                                        <th>SG</th>
+                                        <th>Pts</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for index, row in tabela_away.iterrows %}
+                                <tr>
+                                    <td>{{row.Pos}}</td>
+                                    <td style="text-align: center; vertical-align: middle;" ><a href="/times/{{ row.url }}"><img src="/static/escudos/{{ row.Time }}.png" alt="{{ row.Time }} Crest" height="30px"></a></td>
+                                    <td><a href="/times/{{ row.url }}" style="color: inherit; text-decoration: none;">{{ row.Time }}</a></td>
                                     <td>{{ row.J }}</td>
                                     <td>{{ row.V }}</td>
                                     <td>{{ row.E }}</td>
