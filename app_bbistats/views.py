@@ -21,10 +21,10 @@ def forma_tabela(divisao, tipo_tabela=''):
         times_que_perderam_pts = ['Reading', 'Wigan Athletic', 'Southend United', 'Everton']
         pontos_a_tirar = {'Reading': 6, 'Wigan Athletic': 8, 'Southend United': 10, 'Everton':6}
 
-    for team in times_que_perderam_pts:
-        if team in tabela['Time'].values:
-            # Subtract points for the specific team
-            tabela.loc[tabela['Time'] == team, 'Pts'] -= pontos_a_tirar.get(team, 0)
+        for team in times_que_perderam_pts:
+            if team in tabela['Time'].values:
+                # Subtract points for the specific team
+                tabela.loc[tabela['Time'] == team, 'Pts'] -= pontos_a_tirar.get(team, 0)
 
     resultados_da_liga = Result.objects.filter(liga=divisao).order_by('data')
     for result in resultados_da_liga:
