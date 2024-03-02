@@ -135,7 +135,7 @@ def allinsights(df, nome, time_ou_liga=''):
             except:
                 wins = 0
             n += 1
-        df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins, '1V_qtos_jogos':n-1}])])
+        df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins, '1V_qtos_jogos':n-2}])])
     else:
         for time in df:
             n = 7
@@ -148,7 +148,7 @@ def allinsights(df, nome, time_ou_liga=''):
                 except:
                     wins = 0
                 n+=1
-            df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins, '1V_qtos_jogos':n-1}])])
+            df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins, '1V_qtos_jogos':n-2}])])
     df_stats = pd.merge(df_stats,df_vitorias,on='time',how='left')
     # Quantas derrotas em 10 jogos? (Se > 7, sinalizar, se < 3, sinalizar)
     df_derrotas = pd.DataFrame()
@@ -162,15 +162,20 @@ def allinsights(df, nome, time_ou_liga=''):
             except:
                 loss = 0
             n += 1
-        df_derrotas = pd.concat([df_derrotas, pd.DataFrame([{'time':nome,'derrotas':loss, '1D_qtos_jogos':n-1}])])
+        df_derrotas = pd.concat([df_derrotas, pd.DataFrame([{'time':nome,'derrotas':loss, '1D_qtos_jogos':n-2}])])
     elif time_ou_liga == 'liga':
         for time in df:
-            _ = df[time].tail(10)
-            try:
-                loss = _['result'].value_counts()['loss']
-            except:
-                loss = 0
-            df_derrotas = pd.concat([df_derrotas, pd.DataFrame([{'time':time,'derrotas':loss}])])
+            n = 7
+            loss = 1
+            _ = df[time]
+            while loss == 1 and n <= df[time].shape[0]:
+                _ = df[time].tail(n)
+                try:
+                    loss = _['result'].value_counts()['win']
+                except:
+                    loss = 0
+                n+=1
+            df_derrotas = pd.concat([df_derrotas, pd.DataFrame([{'time':nome,'vitorias':wins, '1D_qtos_jogos':n-2}])])
     df_stats = pd.merge(df_stats,df_derrotas,on='time',how='left')
 
     # Há quanto tempo não perde?

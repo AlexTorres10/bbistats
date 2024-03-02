@@ -17,8 +17,9 @@ def forma_tabela(divisao, tipo_tabela=''):
         novo_time = {'Time': time.time, 'J': 0, 'V': 0, 'E': 0, 'D': 0, 'GM': 0, 'GS': 0, 'SG': 0, 'Pts': 0}
         tabela = pd.concat([tabela, pd.DataFrame([novo_time])], ignore_index=True)
 
-    times_que_perderam_pts = ['Reading', 'Wigan Athletic', 'Southend United', 'Everton']
-    pontos_a_tirar = {'Reading': 4, 'Wigan Athletic': 8, 'Southend United': 10, 'Everton':10}
+    if tipo_tabela == '':
+        times_que_perderam_pts = ['Reading', 'Wigan Athletic', 'Southend United', 'Everton']
+        pontos_a_tirar = {'Reading': 6, 'Wigan Athletic': 8, 'Southend United': 10, 'Everton':6}
 
     for team in times_que_perderam_pts:
         if team in tabela['Time'].values:
