@@ -119,8 +119,8 @@
                     <tbody>
                         {% for index, row in table.iterrows %}
                             <tr>
-                                <td style="text-align: center; vertical-align: middle;"><img src="/static/escudos/{{ row.Time }}.png" alt="{{ row.Time }} Crest" height="30px" ></td>
-                                <td>{{ row.Time }}</td>
+                                <td style="text-align: center; vertical-align: middle;" ><a href="/times/{{ row.url }}" ><img src="/static/escudos/{{ row.Time }}.png" alt="{{ row.Time }} Crest" height="30px"></a></td>
+                                <td><a href="/times/{{ row.url }}" style="color: inherit; text-decoration: none;">{{ row.Time }}</a></td>
                                 <td>{{ row.J }}</td>
                                 <td>{{ row.SG }}</td>
                                 <td>{{ row.Pts }}</td>

@@ -199,7 +199,7 @@
                 
                         <ul>
                             {% for fact in stats %}
-                                <li>{{ fact }}</li>
+                                <li>{{ fact | safe }}</li>
                             {% empty %}
                                 <li>Sem estatísticas relevantes.</li>
                             {% endfor %}

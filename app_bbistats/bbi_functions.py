@@ -68,7 +68,6 @@ def allinsights(df, nome, time_ou_liga=''):
             else:
                 n_jogos = _.shape[0]
             df_last_win = pd.concat([df_last_win, pd.DataFrame([{'time':time,'nao_vence_faz':n_jogos}])])
-    
     df_stats = pd.merge(df_stats,df_last_win,on='time',how='left')
 
     # Está com quantas vitórias seguidas?
@@ -128,14 +127,18 @@ def allinsights(df, nome, time_ou_liga=''):
     if time_ou_liga == 'time':
         n = 7
         wins = 1
-        while wins == 1:
+        while wins == 1 and n <= df_aux.shape[0]:
             _ = df_aux.tail(n)
             try:
                 wins = _['result'].value_counts()['win']
             except:
                 wins = 0
-            n += 1
-        df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins, '1V_qtos_jogos':n-2}])])
+            if wins == 1:
+                n += 1
+                
+        if n < df_aux.shape[0]:
+            n -= 1
+        df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins, '1V_qtos_jogos':n}])])
     else:
         for time in df:
             n = 7
@@ -147,8 +150,12 @@ def allinsights(df, nome, time_ou_liga=''):
                     wins = _['result'].value_counts()['win']
                 except:
                     wins = 0
-                n+=1
-            df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins, '1V_qtos_jogos':n-2}])])
+                
+                if wins == 1:
+                    n += 1
+            if n < df[time].shape[0]:
+                n -= 1
+            df_vitorias = pd.concat([df_vitorias, pd.DataFrame([{'time':nome,'vitorias':wins, '1V_qtos_jogos':n}])])
     df_stats = pd.merge(df_stats,df_vitorias,on='time',how='left')
     # Quantas derrotas em 10 jogos? (Se > 7, sinalizar, se < 3, sinalizar)
     df_derrotas = pd.DataFrame()
@@ -161,8 +168,11 @@ def allinsights(df, nome, time_ou_liga=''):
                 loss = _['result'].value_counts()['loss']
             except:
                 loss = 0
-            n += 1
-        df_derrotas = pd.concat([df_derrotas, pd.DataFrame([{'time':nome,'derrotas':loss, '1D_qtos_jogos':n-2}])])
+            if loss == 1:
+                n += 1
+        if n < df_aux.shape[0]:
+            n -= 1
+        df_derrotas = pd.concat([df_derrotas, pd.DataFrame([{'time':nome,'derrotas':loss, '1D_qtos_jogos':n}])])
     elif time_ou_liga == 'liga':
         for time in df:
             n = 7
@@ -174,8 +184,11 @@ def allinsights(df, nome, time_ou_liga=''):
                     loss = _['result'].value_counts()['win']
                 except:
                     loss = 0
-                n+=1
-            df_derrotas = pd.concat([df_derrotas, pd.DataFrame([{'time':nome,'vitorias':wins, '1D_qtos_jogos':n-2}])])
+                if loss == 1:
+                    n += 1
+        if n < df[time].shape[0]:
+            n -= 1
+            df_derrotas = pd.concat([df_derrotas, pd.DataFrame([{'time':nome,'vitorias':wins, '1D_qtos_jogos':n}])])
     df_stats = pd.merge(df_stats,df_derrotas,on='time',how='left')
 
     # Há quanto tempo não perde?

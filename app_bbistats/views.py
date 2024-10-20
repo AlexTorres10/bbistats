@@ -12,14 +12,13 @@ def forma_tabela(divisao, tipo_tabela=''):
     colunas_tabela = ['Time','J','V','E','D','GM','GS','SG','Pts']
     tabela = pd.DataFrame(columns=colunas_tabela)
 
-    team_dataframes = []
     for time in times_da_liga:
         novo_time = {'Time': time.time, 'J': 0, 'V': 0, 'E': 0, 'D': 0, 'GM': 0, 'GS': 0, 'SG': 0, 'Pts': 0}
         tabela = pd.concat([tabela, pd.DataFrame([novo_time])], ignore_index=True)
 
     if tipo_tabela == '':
-        times_que_perderam_pts = ['Reading', 'Wigan Athletic', 'Southend United', 'Everton']
-        pontos_a_tirar = {'Reading': 6, 'Wigan Athletic': 8, 'Southend United': 10, 'Everton':6}
+        times_que_perderam_pts = ['Sheffield United']
+        pontos_a_tirar = {'Sheffield United': 2}
 
         for team in times_que_perderam_pts:
             if team in tabela['Time'].values:
@@ -50,7 +49,7 @@ def home(request):
     show_tabela = {}
     for l in ligas:
         tabela_da_liga[l] = forma_tabela(l)
-        show_tabela[l] = tabela_da_liga[l].head(7)[['Time', 'J', 'SG', 'Pts']]
+        show_tabela[l] = tabela_da_liga[l].head(7)[['Time', 'J', 'SG', 'Pts', 'url']]
 
     context = {
         'tabelas':{
@@ -77,13 +76,18 @@ def liga(request, liga):
     for time in df_times['time'].unique():
         resultados = get_results(time)
         df = pd.DataFrame.from_records(resultados.values())
-        df.columns = ['idresults', 'casa', 'placar', 'fora', 'data', 'liga']
-        df['result'] = df.apply(lambda row: wdl(row, time), axis=1)
-        df['gf'] = df.apply(lambda row: gf(row, time),axis=1)
-        df['gs'] = df.apply(lambda row: gs(row, time),axis=1)
+        try:
+            df.columns = ['idresults', 'casa', 'placar', 'fora', 'data', 'liga']
+            df['result'] = df.apply(lambda row: wdl(row, time), axis=1)
+            df['gf'] = df.apply(lambda row: gf(row, time),axis=1)
+            df['gs'] = df.apply(lambda row: gs(row, time),axis=1)
+        except:
+            df = pd.DataFrame(columns=['idresults', 'casa', 'placar', 'fora', 'data', 'liga'])
         results[time] = df
-    
-    stats = allinsights(results, liga_base, time_ou_liga='liga')
+    try:
+        stats = allinsights(results, liga_base, time_ou_liga='liga')
+    except:
+        stats = []
 
     sb = {
         'PremierLeague': Time.objects.filter(divisao='Premier League').order_by('time'),
@@ -97,6 +101,40 @@ def liga(request, liga):
     tabela_home = forma_tabela(liga_base, 'mandante')
     tabela_away = forma_tabela(liga_base, 'visitante')
 
+    if len(stats) > 0:
+        stats.insert(0, f"<b>Melhor mandante: {tabela_home['Time'][0]}</b>")
+        stats.insert(1, f"<b>Melhor visitante: {tabela_away['Time'][0]}</b>")
+        stats.insert(2, f"<b>Pior mandante: {tabela_home['Time'].iloc[-1]}</b>")
+        stats.insert(3, f"<b>Pior visitante: {tabela_away['Time'].iloc[-1]}</b>")
+
+    # Pegar os melhores ataques
+    qtd_gols = tabela_liga.sort_values(by='GM', ascending=False)['GM'].iloc[0]
+    melhores_ataques = tabela_liga[tabela_liga['GM'] == qtd_gols]
+    melhores_ataques = ', '.join(melhores_ataques['Time'].values)
+    if len(stats) > 0:
+        stats.insert(4, f"<b>Melhor ataque: {melhores_ataques} com {qtd_gols} gols marcados</b>")
+
+    # Pegar as melhores defesas
+    qtd_gols = tabela_liga.sort_values(by='GS', ascending=True)['GS'].iloc[0]
+    melhores_defesas = tabela_liga[tabela_liga['GS'] == qtd_gols]
+    melhores_defesas = ', '.join(melhores_defesas['Time'].values)
+    if len(stats) > 0:
+        stats.insert(5, f"<b>Melhor defesa: {melhores_defesas} com {qtd_gols} gols sofridos</b>")
+
+    # Pegar os piores ataques
+    qtd_gols = tabela_liga.sort_values(by='GM', ascending=True)['GM'].iloc[0]
+    piores_ataques = tabela_liga[tabela_liga['GM'] == qtd_gols]
+    piores_ataques = ', '.join(piores_ataques['Time'].values)
+    if len(stats) > 0:
+        stats.insert(6, f"<b>Pior ataque: {piores_ataques} com {qtd_gols} gols marcados</b>")
+
+    # Pegar as piores defesas
+    qtd_gols = tabela_liga.sort_values(by='GS', ascending=False)['GS'].iloc[0]
+    piores_ataques = tabela_liga[tabela_liga['GS'] == qtd_gols]
+    piores_ataques = ', '.join(piores_ataques['Time'].values)
+    if len(stats) > 0:
+        stats.insert(7, f"<b>Pior defesa: {piores_ataques} com {qtd_gols} gols sofridos</b>")
+
     return render(request, 'liga.html', {'league': liga_base, 'stats': stats, 'sb':sb, 'times_da_liga':times_da_liga, 'tabela_liga':tabela_liga,
                                          'tabela_home':tabela_home, 'tabela_away':tabela_away})
 
@@ -108,6 +146,7 @@ def times(request, team_name):
 
     df = pd.DataFrame.from_records(resultados.values())
 
+
     df.columns = ['idresults', 'casa', 'placar', 'fora', 'data', 'liga']
     
     df['result'] = df.apply(lambda row: wdl(row, team_base), axis=1)
@@ -116,8 +155,41 @@ def times(request, team_name):
 
     liga = df['liga'].unique()[0]
     tabela_time = forma_tabela(liga)
+    melhores_mandantes = forma_tabela(liga, 'mandante')['Time'][:3].to_list()
+    piores_mandantes = forma_tabela(liga, 'mandante')['Time'][-3:][::-1].to_list() # Começando do pior
+    melhores_visitantes = forma_tabela(liga, 'visitante')['Time'][:3].to_list()
+    piores_visitantes = forma_tabela(liga, 'visitante')['Time'][-3:][::-1].to_list() # Começando do pior
+
     
     stats = allinsights(df, team_base, time_ou_liga='time')
+
+    for i in range(len(melhores_mandantes)):
+        if team_base == melhores_mandantes[i]:
+            if i == 0:
+                stats.append(f"<b>{team_base} é o melhor mandante!</b>")
+            else:
+                stats.append(f"{team_base} é o {i+1}º melhor mandante!")
+
+    for i in range(len(piores_mandantes)):
+        if team_base == piores_mandantes[i]:
+            if i == 0:
+                stats.append(f"<b>{team_base} é o pior mandante!</b>")
+            else:
+                stats.append(f"{team_base} é o {i+1}º pior mandante!")
+
+    for i in range(len(melhores_visitantes)):
+        if team_base == melhores_visitantes[i]:
+            if i == 0:
+                stats.append(f"<b>{team_base} é o melhor visitante!</b>")
+            else:
+                stats.append(f"{team_base} é o {i+1}º melhor visitante!")
+
+    for i in range(len(piores_visitantes)):
+        if team_base == piores_visitantes[i]:
+            if i == 0:
+                stats.append(f"<b>{team_base} é o pior visitante!</b>")
+            else:
+                stats.append(f"{team_base} é o {i+1}º pior visitante!")
 
     times_a_aparecer = Time.objects.filter(divisao=liga).order_by('time')
 
