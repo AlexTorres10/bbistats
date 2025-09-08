@@ -1,1 +1,5 @@
 bbistats/settings.py
+bbistats/__pycache__/
+app_bbistats/__pycache__/
+app_bbistats/migrations/__pycache__
+.codegpt

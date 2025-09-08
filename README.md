@@ -18,7 +18,8 @@ python manage.py runserver
 ~~~
 
 ## Bibliotecas utilizadas
-Pandas - para formar as tabelas e conseguir retornar as estatísticas revelantes
+Pandas - para formar as tabelas e conseguir retornar as estatísticas relevantes.
+
 
 ## Próximos passos
 Pretendo incluir: 
