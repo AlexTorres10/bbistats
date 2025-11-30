@@ -18,7 +18,7 @@ def forma_tabela(divisao, tipo_tabela=''):
 
     if tipo_tabela == '':
         times_que_perderam_pts = ['']
-        pontos_a_tirar = {'Morecambe': 1}
+        pontos_a_tirar = {}
 
         for team in times_que_perderam_pts:
             if team in tabela['Time'].values:
@@ -84,6 +84,7 @@ def liga(request, liga):
         except:
             df = pd.DataFrame(columns=['idresults', 'casa', 'placar', 'fora', 'data', 'liga'])
         results[time] = df
+    stats = allinsights(results, liga_base, time_ou_liga='liga')
     try:
         stats = allinsights(results, liga_base, time_ou_liga='liga')
     except:
